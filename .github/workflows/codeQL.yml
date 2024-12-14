@@ -1,0 +1,71 @@
+name: CodeQL Cross-Repo Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Set up CodeQL
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript # Change this based on your project language
+
+    # Build the project
+    - name: Build Code
+      run: |
+        # Your build steps here
+        # Example for npm:
+        npm install
+
+    # Run CodeQL Analysis
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+    # Export CodeQL Database
+    - name: Export CodeQL Database
+      run: |
+        mkdir -p output
+        codeql database export --format=sarif --output=output/codeql-database.sarif
+      env:
+        CODEQL_DIST: ${{ github.workspace }}/codeql-dist # Set if running custom CodeQL
+
+    # Upload Database as an Artifact
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: codeql-database
+        path: output/codeql-database.sarif
+
+  cross-repo-analysis:
+    name: Cross-Repo Analysis
+    runs-on: ubuntu-latest
+    needs: codeql-analysis
+
+    steps:
+    # Download artifacts from all repositories (via workflow dispatch or external artifacts)
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: codeql-database
+        path: ./databases
+
+    # Combine and Analyze
+    - name: Combine and Map Connections
+      run: |
+        python map_connections.py ./databases
+      env:
+        PYTHONPATH: ./scripts
