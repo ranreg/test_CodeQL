@@ -1,0 +1,16 @@
+{
+  "name": "dummy-nodejs-app",
+  "version": "1.0.0",
+  "description": "A dummy Node.js app using Express, Axios, and EJS.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "author": "Jhon",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
+  }
+}
